@@ -3,6 +3,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Opterest Storage - Modern Landing Page Loaded');
     
+    // Clear any unwanted transforms from hero elements
+    clearHeroTransforms();
+    
     // Initialize core features
     initializeCloseAnnouncement();
     initializeButtonInteractions();
@@ -16,6 +19,10 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeBackToTop();
     initializeLazyLoading();
     initializeCreativeInteractions();
+    initializeMobileStickyButton(); // Add mobile sticky button functionality
+    
+    // Final UI polish and conversion optimization
+    initializeFinalOptimizations();
 });
 
 /**
@@ -348,29 +355,29 @@ function initializeCreativeInteractions() {
     // Dynamic color theme switching
     initializeThemeEffects();
     
-    // Cursor follow effects
-    initializeCursorEffects();
+    // Cursor follow effects removed per user request
 }
 
 /**
- * Parallax scrolling effect for hero section
+ * Parallax scrolling effect for hero section - DISABLED
+ * This was causing unwanted displacement of hero content elements
  */
 function initializeParallaxEffect() {
-    const heroRight = document.querySelector('.hero-right');
-    const heroLeft = document.querySelector('.hero-left');
+    // Parallax effect disabled to maintain stable hero content positioning
+    // for better user experience and marketing conversion optimization
+    console.log('Parallax effect disabled for hero stability');
     
-    if (heroRight && heroLeft) {
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const rate = scrolled * -0.5;
-            const rateLeft = scrolled * -0.3;
-            
-            if (scrolled < window.innerHeight) {
-                heroRight.style.transform = `translate3d(0, ${rate}px, 0)`;
-                heroLeft.style.transform = `translate3d(0, ${rateLeft}px, 0)`;
-            }
-        });
-    }
+    // Alternative: Only apply subtle parallax to background elements if needed
+    // const backgroundElements = document.querySelectorAll('.parallax-bg');
+    // backgroundElements.forEach(element => {
+    //     window.addEventListener('scroll', () => {
+    //         const scrolled = window.pageYOffset;
+    //         const rate = scrolled * -0.2;
+    //         if (scrolled < window.innerHeight) {
+    //             element.style.transform = `translate3d(0, ${rate}px, 0)`;
+    //         }
+    //     });
+    // });
 }
 
 /**
@@ -527,51 +534,8 @@ function initializeThemeEffects() {
 }
 
 /**
- * Cursor follow effects for interactive elements
+ * Cursor following effect removed per user request
  */
-function initializeCursorEffects() {
-    if (window.innerWidth > 768) { // Only on desktop
-        const cursor = document.createElement('div');
-        cursor.className = 'custom-cursor';
-        cursor.style.cssText = `
-            position: fixed;
-            width: 20px;
-            height: 20px;
-            background: rgba(99, 102, 241, 0.3);
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            transition: all 0.1s ease;
-            transform: translate(-50%, -50%);
-            opacity: 0;
-        `;
-        document.body.appendChild(cursor);
-        
-        document.addEventListener('mousemove', (e) => {
-            cursor.style.left = e.clientX + 'px';
-            cursor.style.top = e.clientY + 'px';
-            cursor.style.opacity = '1';
-        });
-        
-        document.addEventListener('mouseleave', () => {
-            cursor.style.opacity = '0';
-        });
-        
-        // Enhanced cursor on interactive elements
-        const interactiveElements = document.querySelectorAll('.btn, .feature-card, .stat-card, .faq-question');
-        interactiveElements.forEach(element => {
-            element.addEventListener('mouseenter', () => {
-                cursor.style.transform = 'translate(-50%, -50%) scale(1.5)';
-                cursor.style.background = 'rgba(16, 185, 129, 0.4)';
-            });
-            
-            element.addEventListener('mouseleave', () => {
-                cursor.style.transform = 'translate(-50%, -50%) scale(1)';
-                cursor.style.background = 'rgba(99, 102, 241, 0.3)';
-            });
-        });
-    }
-}
 
 /**
  * Close modal helper
@@ -1322,4 +1286,170 @@ function validateForm(form) {
     });
     
     return isValid;
+}
+
+/**
+ * Mobile sticky reserve button functionality
+ */
+function initializeMobileStickyButton() {
+    const mobileSticky = document.getElementById('mobileReserveSticky');
+    const heroSection = document.querySelector('.hero');
+    
+    if (!mobileSticky || !heroSection) return;
+    
+    let isVisible = false;
+    
+    function updateStickyButtonVisibility() {
+        const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+        const scrollPosition = window.scrollY;
+        const shouldShow = scrollPosition > heroBottom - 100; // Show when hero is mostly scrolled past
+        
+        if (shouldShow && !isVisible) {
+            mobileSticky.classList.add('show');
+            isVisible = true;
+        } else if (!shouldShow && isVisible) {
+            mobileSticky.classList.remove('show');
+            isVisible = false;
+        }
+    }
+    
+    // Initial check
+    updateStickyButtonVisibility();
+    
+    // Listen for scroll events with throttling for performance
+    let ticking = false;
+    function requestTick() {
+        if (!ticking) {
+            requestAnimationFrame(updateStickyButtonVisibility);
+            ticking = true;
+        }
+    }
+    
+    window.addEventListener('scroll', function() {
+        requestTick();
+        ticking = false;
+    });
+    
+    // Add click tracking for mobile sticky button
+    const stickyBtn = mobileSticky.querySelector('.btn');
+    if (stickyBtn) {
+        stickyBtn.addEventListener('click', function(e) {
+            console.log('Mobile sticky reserve button clicked');
+            trackEvent('click', 'cta', 'mobile_sticky_reserve');
+            
+            // Add haptic feedback
+            if (navigator.vibrate) {
+                navigator.vibrate([50, 30, 50]);
+            }
+            
+            // Add click animation
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    }
+}
+
+/**
+ * Clear any unwanted transforms from hero elements
+ * This fixes the parallax displacement issue
+ */
+function clearHeroTransforms() {
+    const heroLeft = document.querySelector('.hero-left');
+    const heroRight = document.querySelector('.hero-right');
+    
+    if (heroLeft) {
+        heroLeft.style.transform = '';
+        console.log('Cleared transform from hero-left element');
+    }
+    
+    if (heroRight) {
+        heroRight.style.transform = '';
+        console.log('Cleared transform from hero-right element');
+    }
+}
+
+/**
+ * Final UI polish and conversion optimization
+ */
+function initializeFinalOptimizations() {
+    // Ensure hero elements are properly positioned
+    ensureHeroStability();
+    
+    // Add enhanced interaction feedback
+    addConversionOptimizations();
+    
+    // Initialize performance monitoring
+    monitorPagePerformance();
+}
+
+/**
+ * Ensure hero elements maintain stable positioning
+ */
+function ensureHeroStability() {
+    const heroElements = document.querySelectorAll('.hero-left, .hero-right');
+    
+    heroElements.forEach(element => {
+        // Remove any transforms that might have been applied
+        element.style.transform = 'none';
+        element.style.willChange = 'auto';
+        
+        // Add stable positioning class
+        element.classList.add('hero-stable');
+    });
+    
+    console.log('Hero stability ensured for optimal UX');
+}
+
+/**
+ * Add conversion optimization features
+ */
+function addConversionOptimizations() {
+    // Enhanced reserve button tracking
+    const reserveButtons = document.querySelectorAll('.btn-reserve');
+    
+    reserveButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Track conversion intent
+            console.log('Conversion intent tracked: Reserve button clicked');
+            
+            // Add visual feedback
+            this.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1.05)';
+            }, 100);
+            
+            // Add haptic feedback on mobile
+            if (navigator.vibrate) {
+                navigator.vibrate([50, 30, 50]);
+            }
+            
+            // Track for analytics
+            trackEvent('click', 'conversion', 'reserve_storage', {
+                value: 1000,
+                currency: 'MAD'
+            });
+        });
+    });
+}
+
+/**
+ * Monitor page performance for optimization
+ */
+function monitorPagePerformance() {
+    // Track page load performance
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            if (performance.navigation) {
+                const loadTime = performance.navigation.loadEventEnd - performance.navigation.navigationStart;
+                console.log(`Page load time: ${loadTime}ms`);
+                
+                // Track performance for analytics
+                trackEvent('timing', 'performance', 'page_load', {
+                    value: Math.round(loadTime)
+                });
+            }
+        }, 0);
+    });
 }
