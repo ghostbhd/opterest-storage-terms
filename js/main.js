@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeTestimonialCarousel();
     initializeBackToTop();
     initializeLazyLoading();
+    initializeCreativeInteractions();
 });
 
 /**
@@ -329,117 +330,247 @@ function initializeAnimations() {
 }
 
 /**
- * Create ripple effect on button click
+ * Enhanced Creative UI Interactions
  */
-function createRippleEffect(event, element) {
-    const ripple = document.createElement('span');
-    const rect = element.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
-    const x = event.clientX - rect.left - size / 2;
-    const y = event.clientY - rect.top - size / 2;
+function initializeCreativeInteractions() {
+    // Parallax effect for hero section
+    initializeParallaxEffect();
     
-    ripple.style.cssText = `
-        position: absolute;
-        width: ${size}px;
-        height: ${size}px;
-        left: ${x}px;
-        top: ${y}px;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        transform: scale(0);
-        animation: ripple 0.6s ease-out;
-        pointer-events: none;
-        z-index: 1000;
-    `;
+    // Interactive statistics counter
+    initializeStatCounters();
     
-    // Add ripple animation if not exists
-    if (!document.querySelector('#ripple-style')) {
-        const style = document.createElement('style');
-        style.id = 'ripple-style';
-        style.textContent = `
-            @keyframes ripple {
-                to {
-                    transform: scale(2);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    }
+    // Dynamic button ripple effects
+    initializeRippleEffects();
     
-    element.style.position = 'relative';
-    element.style.overflow = 'hidden';
-    element.appendChild(ripple);
+    // Interactive feature card tilting
+    initializeCardTilting();
     
-    setTimeout(() => {
-        ripple.remove();
-    }, 600);
+    // Dynamic color theme switching
+    initializeThemeEffects();
+    
+    // Cursor follow effects
+    initializeCursorEffects();
 }
 
 /**
- * Show toast notification
+ * Parallax scrolling effect for hero section
  */
-function showToast(message) {
-    const toast = document.createElement('div');
-    toast.textContent = message;
-    toast.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 12px 24px;
-        border-radius: 8px;
-        z-index: 10000;
-        font-size: 14px;
-        transition: opacity 0.3s ease;
+function initializeParallaxEffect() {
+    const heroRight = document.querySelector('.hero-right');
+    const heroLeft = document.querySelector('.hero-left');
+    
+    if (heroRight && heroLeft) {
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const rate = scrolled * -0.5;
+            const rateLeft = scrolled * -0.3;
+            
+            if (scrolled < window.innerHeight) {
+                heroRight.style.transform = `translate3d(0, ${rate}px, 0)`;
+                heroLeft.style.transform = `translate3d(0, ${rateLeft}px, 0)`;
+            }
+        });
+    }
+}
+
+/**
+ * Animated counters for statistics
+ */
+function initializeStatCounters() {
+    const statValues = document.querySelectorAll('.stat-value');
+    
+    const animateValue = (element, start, end, duration) => {
+        const startTimestamp = performance.now();
+        const originalText = element.textContent;
+        
+        const step = (timestamp) => {
+            const elapsed = timestamp - startTimestamp;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const currentValue = Math.floor(progress * (end - start) + start);
+            
+            if (originalText.includes('$')) {
+                element.textContent = `$${currentValue}.99`;
+            } else if (originalText.includes('+')) {
+                element.textContent = `${currentValue}+`;
+            } else {
+                element.textContent = currentValue;
+            }
+            
+            if (progress < 1) {
+                requestAnimationFrame(step);
+            }
+        };
+        
+        requestAnimationFrame(step);
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const element = entry.target;
+                const text = element.textContent;
+                
+                if (text.includes('500+')) {
+                    animateValue(element, 0, 500, 2000);
+                } else if (text.includes('200+')) {
+                    animateValue(element, 0, 200, 1500);
+                } else if (text.includes('$29.99')) {
+                    animateValue(element, 0, 29, 1000);
+                }
+                
+                observer.unobserve(element);
+            }
+        });
+    });
+    
+    statValues.forEach(stat => observer.observe(stat));
+}
+
+/**
+ * Enhanced ripple effects for buttons
+ */
+function initializeRippleEffects() {
+    const buttons = document.querySelectorAll('.btn');
+    
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = x + 'px';
+            ripple.style.top = y + 'px';
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(255, 255, 255, 0.6)';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.pointerEvents = 'none';
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                if (ripple.parentNode) {
+                    ripple.parentNode.removeChild(ripple);
+                }
+            }, 600);
+        });
+    });
+    
+    // Add ripple animation CSS
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
     `;
+    document.head.appendChild(style);
+}
+
+/**
+ * 3D tilting effect for feature cards
+ */
+function initializeCardTilting() {
+    const cards = document.querySelectorAll('.feature-card, .stat-card');
     
-    document.body.appendChild(toast);
+    cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = (y - centerY) / 10;
+            const rotateY = (centerX - x) / 10;
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(20px)`;
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0)';
+        });
+    });
+}
+
+/**
+ * Dynamic theme color effects
+ */
+function initializeThemeEffects() {
+    let colorIndex = 0;
+    const colors = [
+        'rgba(99, 102, 241, 0.1)',
+        'rgba(16, 185, 129, 0.1)',
+        'rgba(59, 130, 246, 0.1)',
+        'rgba(245, 158, 11, 0.1)'
+    ];
     
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => {
-            document.body.removeChild(toast);
-        }, 300);
+    setInterval(() => {
+        const elements = document.querySelectorAll('.floating-element');
+        elements.forEach((element, index) => {
+            if (index % 3 === colorIndex % 3) {
+                element.style.background = colors[colorIndex % colors.length];
+            }
+        });
+        colorIndex++;
     }, 3000);
 }
 
 /**
- * Enhanced analytics tracking
+ * Cursor follow effects for interactive elements
  */
-function trackEvent(action, category, label, value) {
-    // Google Analytics 4
-    if (typeof gtag !== 'undefined') {
-        gtag('event', action, {
-            event_category: category,
-            event_label: label,
-            value: value
+function initializeCursorEffects() {
+    if (window.innerWidth > 768) { // Only on desktop
+        const cursor = document.createElement('div');
+        cursor.className = 'custom-cursor';
+        cursor.style.cssText = `
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transition: all 0.1s ease;
+            transform: translate(-50%, -50%);
+            opacity: 0;
+        `;
+        document.body.appendChild(cursor);
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            cursor.style.opacity = '1';
+        });
+        
+        document.addEventListener('mouseleave', () => {
+            cursor.style.opacity = '0';
+        });
+        
+        // Enhanced cursor on interactive elements
+        const interactiveElements = document.querySelectorAll('.btn, .feature-card, .stat-card, .faq-question');
+        interactiveElements.forEach(element => {
+            element.addEventListener('mouseenter', () => {
+                cursor.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                cursor.style.background = 'rgba(16, 185, 129, 0.4)';
+            });
+            
+            element.addEventListener('mouseleave', () => {
+                cursor.style.transform = 'translate(-50%, -50%) scale(1)';
+                cursor.style.background = 'rgba(99, 102, 241, 0.3)';
+            });
         });
     }
-    
-    // Console logging for development
-    console.log(`Event tracked: ${action} | ${category} | ${label}${value ? ` | ${value}` : ''}`);
-}
-
-/**
- * Form validation helper
- */
-function validateForm(form) {
-    const requiredFields = form.querySelectorAll('[required]');
-    let isValid = true;
-    
-    requiredFields.forEach(field => {
-        if (!field.value.trim()) {
-            field.classList.add('error');
-            isValid = false;
-        } else {
-            field.classList.remove('error');
-        }
-    });
-    
-    return isValid;
 }
 
 /**
@@ -1077,4 +1208,118 @@ function initializeLazyLoading() {
     deferredStyles.forEach(styleSheet => {
         styleSheet.setAttribute('rel', 'stylesheet');
     });
+}
+
+/**
+ * Create ripple effect on button click
+ */
+function createRippleEffect(event, element) {
+    const ripple = document.createElement('span');
+    const rect = element.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+    
+    ripple.style.cssText = `
+        position: absolute;
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}px;
+        top: ${y}px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: scale(0);
+        animation: ripple 0.6s ease-out;
+        pointer-events: none;
+        z-index: 1000;
+    `;
+    
+    // Add ripple animation if not exists
+    if (!document.querySelector('#ripple-style')) {
+        const style = document.createElement('style');
+        style.id = 'ripple-style';
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(2);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    element.style.position = 'relative';
+    element.style.overflow = 'hidden';
+    element.appendChild(ripple);
+    
+    setTimeout(() => {
+        ripple.remove();
+    }, 600);
+}
+
+/**
+ * Show toast notification
+ */
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        z-index: 10000;
+        font-size: 14px;
+        transition: opacity 0.3s ease;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+/**
+ * Enhanced analytics tracking
+ */
+function trackEvent(action, category, label, value) {
+    // Google Analytics 4
+    if (typeof gtag !== 'undefined') {
+        gtag('event', action, {
+            event_category: category,
+            event_label: label,
+            value: value
+        });
+    }
+    
+    // Console logging for development
+    console.log(`Event tracked: ${action} | ${category} | ${label}${value ? ` | ${value}` : ''}`);
+}
+
+/**
+ * Form validation helper
+ */
+function validateForm(form) {
+    const requiredFields = form.querySelectorAll('[required]');
+    let isValid = true;
+    
+    requiredFields.forEach(field => {
+        if (!field.value.trim()) {
+            field.classList.add('error');
+            isValid = false;
+        } else {
+            field.classList.remove('error');
+        }
+    });
+    
+    return isValid;
 }
