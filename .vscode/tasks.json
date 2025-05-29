@@ -1,0 +1,13 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Serve Opterest Landing Page",
+			"type": "shell",
+			"command": "cd \"/home/ghost/Documents/Opterest/opterest Storage/opterestStorageWEB\" && python3 -m http.server 8080",
+			"group": "serve",
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
